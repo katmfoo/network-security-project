@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <title>WebSocket Testing</title>
+  </head>
+  <body>
+    <script>
+      // Utility function to sleep
+      const sleep = (milliseconds) => {
+        return new Promise(resolve => setTimeout(resolve, milliseconds))
+      }
+
+      let server = new WebSocket("ws://localhost:8080");
+
+      let server_send_times = [];
+      let messages_received = 0;
+
+      // Wait for websocket connection to establish
+      server.onopen = () => {
+
+        // Function to ping server with sent unix time in microseconds, wait 500 milliseconds,
+        // and repeat 100 times
+        async function testSending() {
+          for (let i = 0; i < 100; i++) {
+            server.send("Sent at " + Date.now());
+            await sleep(500);
+          }
+        }
+
+        testSending();
+
+        // When we get a message from the server
+        server.onmessage = (event) => {
+
+          const message = event.data;
+
+          // Log it to the console
+          console.log('received: %s', message);
+
+          // Get the sent_time in microseconds of the message
+          const sent_time = message.substr(message.lastIndexOf(' ') + 1);
+
+          // Add the time in microseconds that this message took to get here
+          // to the server_send_times array
+          server_send_times.push(Date.now() - sent_time);
+
+          messages_received++;
+
+          // If we are on our last message, we are done, log the server send times to the
+          // console
+          if (messages_received == 100) {
+            console.log(server_send_times);
+          }
+        };
+      };
+
+
+    </script>
+    <div id="console"></div>
+  </body>
+ </html>
