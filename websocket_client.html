@@ -9,7 +9,7 @@
         return new Promise(resolve => setTimeout(resolve, milliseconds))
       }
 
-      let server = new WebSocket("ws://localhost:8080");
+      let server = new WebSocket("ws://167.99.4.106:8080");
 
       let server_send_times = [];
       let messages_received = 0;
@@ -41,7 +41,7 @@
 
           // Add the time in microseconds that this message took to get here
           // to the server_send_times array
-          server_send_times.push(Date.now() - sent_time);
+          server_send_times.push(sent_time - Date.now());
 
           messages_received++;
 
