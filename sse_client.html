@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>WebSocket Testing</title>
+    <title>SSE Testing</title>
   </head>
   <body>
     <script>
@@ -9,34 +9,37 @@
         return new Promise(resolve => setTimeout(resolve, milliseconds))
       }
 
-      let server = new WebSocket("ws://167.99.4.106:8080");
-
-      let server_send_times = [];
-      let messages_received = 0;
-
-      // Wait for websocket connection to establish
-      server.onopen = () => {
+      const url = "http://167.99.4.106:8081";
+      
+      (async () => {
 
         // Function to ping server with sent unix time in microseconds, wait 500 milliseconds,
         // and repeat 100 times
         async function testSending() {
           for (let i = 0; i < 100; i++) {
 	    let data = "Sent at " + Date.now();
-	    console.log("Sending '" + data + "' to server via websocket");
-            server.send(data);
+	    console.log("Sending '" + data + "' to server via post request (sse)");
+	    let xhttp = new XMLHttpRequest();
+	    xhttp.open("POST", url + "/data", true); 
+	    xhttp.send(data);
             await sleep(500);
           }
         }
 
-        testSending();
+        await testSending();
 
-        // When we get a message from the server
-        server.onmessage = (event) => {
+        let server_send_times = [];
+        let messages_received = 0;
+
+        let server = new EventSource(url + "/sse-server");
+	
+	// When we get a server sent event
+	server.onmessage = (event) => {
 
           const message = event.data;
 
           // Log it to the console
-	  console.log("Received '%s' from server via websocket", message);
+	  console.log("Received '%s' from server via sse", message);
 
           // Get the sent_time in microseconds of the message
           const sent_time = message.substr(message.lastIndexOf(' ') + 1);
@@ -52,10 +55,8 @@
           if (messages_received == 100) {
             console.log(server_send_times);
           }
-        };
-      };
-
-
+	};
+      })();
     </script>
     <div id="console"></div>
   </body>
