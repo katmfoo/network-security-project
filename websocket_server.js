@@ -17,7 +17,7 @@ wss.on('connection', function connection(ws) {
   ws.on('message', async function incoming(message) {
 
     // Log it to the console
-    console.log('received: %s', message);
+    console.log("Received '%s' from client via websocket", message);
 
     // Get the sent_time in microseconds of the message
     const sent_time = message.substr(message.lastIndexOf(' ') + 1);
@@ -34,7 +34,9 @@ wss.on('connection', function connection(ws) {
       // Ping client with sent unix time in microseconds, wait 500 milliseconds,
       // and repeat 100 times
       for (let i = 0; i < 100; i++) {
-        ws.send("Sent at " + Date.now());
+	let data = "Sent at " + Date.now();
+	console.log("Sending '" + data + "' to client via websocket");
+        ws.send(data);
         await sleep(500);
       }
 
